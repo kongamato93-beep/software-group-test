@@ -1,0 +1,2014 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "狂神の小社区 API",
+    "version": "1.0.0",
+    "description": "kuang_simple_bbs（Spring Boot + Spring Security + MyBatis-Plus）接口描述。认证方式为 Session：先调用 /login 获得 JSESSIONID，后续请求由 Cookie 承载。"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "本地开发环境"
+    }
+  ],
+  "tags": [
+    {
+      "name": "01-认证与会话",
+      "description": "登录 / 注册 / 注销等会话相关接口"
+    },
+    {
+      "name": "02-博客模块",
+      "description": "博客的增删改查与评论"
+    },
+    {
+      "name": "03-问答模块",
+      "description": "问答的增删改查与评论、附件上传"
+    },
+    {
+      "name": "04-用户与资料",
+      "description": "用户主页、个人资料、评论管理"
+    },
+    {
+      "name": "05-公共页面",
+      "description": "资源库、公告等公共功能"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "01-认证与会话"
+        ],
+        "operationId": "index",
+        "summary": "首页",
+        "description": "无需登录，返回首页 HTML。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/index": {
+      "get": {
+        "tags": [
+          "01-认证与会话"
+        ],
+        "operationId": "indexAlias",
+        "summary": "首页别名",
+        "description": "与 / 等价。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/toLogin": {
+      "get": {
+        "tags": [
+          "01-认证与会话"
+        ],
+        "operationId": "toLogin",
+        "summary": "登录页",
+        "description": "返回登录表单页。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/register": {
+      "get": {
+        "tags": [
+          "01-认证与会话"
+        ],
+        "operationId": "toRegister",
+        "summary": "注册页",
+        "description": "返回注册表单页。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "01-认证与会话"
+        ],
+        "operationId": "register",
+        "summary": "注册",
+        "description": "校验密码一致性、用户名唯一、邀请码有效后创建用户。",
+        "responses": {
+          "200": {
+            "description": "注册失败，回填错误信息 registerMsg"
+          },
+          "302": {
+            "description": "注册成功，重定向 /toLogin"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "password",
+                  "repassword",
+                  "code"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "用户名"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "密码"
+                  },
+                  "repassword": {
+                    "type": "string",
+                    "description": "确认密码"
+                  },
+                  "code": {
+                    "type": "string",
+                    "description": "邀请码"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": [
+          "01-认证与会话"
+        ],
+        "operationId": "login",
+        "summary": "登录（Spring Security）",
+        "description": "表单认证。成功下发 JSESSIONID 并 302 到 /index。后续接口需携带该 Cookie。",
+        "responses": {
+          "302": {
+            "description": "认证成功，跳转 /index，响应头 Set-Cookie: JSESSIONID=..."
+          },
+          "200": {
+            "description": "认证失败，重定向回 /toLogin"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "password"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "用户名（root / testuser）"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "密码（123456）"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "get": {
+        "tags": [
+          "01-认证与会话"
+        ],
+        "operationId": "logout",
+        "summary": "注销",
+        "description": "清除会话并回首页。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blog": {
+      "get": {
+        "tags": [
+          "02-博客模块"
+        ],
+        "operationId": "blogList",
+        "summary": "博客列表（固定第 1 页 10 条）",
+        "description": "按 gmt_create 倒序分页查询。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blog/{page}/{limit}": {
+      "get": {
+        "tags": [
+          "02-博客模块"
+        ],
+        "operationId": "blogListPage",
+        "summary": "博客列表（分页）",
+        "description": "page<1 时被强制置为 1；limit 无上限校验。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "path",
+            "required": true,
+            "description": "页码",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "path",
+            "required": true,
+            "description": "每页条数",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/blog/category/{bid}/{page}/{limit}": {
+      "get": {
+        "tags": [
+          "02-博客模块"
+        ],
+        "operationId": "blogByCategory",
+        "summary": "按分类查询博客",
+        "description": "按分类 id 分页查询。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "bid",
+            "in": "path",
+            "required": true,
+            "description": "分类 id 1~5",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page",
+            "in": "path",
+            "required": true,
+            "description": "页码",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "path",
+            "required": true,
+            "description": "每页条数",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/blog/write": {
+      "get": {
+        "tags": [
+          "02-博客模块"
+        ],
+        "operationId": "toWrite",
+        "summary": "打开发帖页",
+        "description": "需登录。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "02-博客模块"
+        ],
+        "operationId": "write",
+        "summary": "发表博客",
+        "description": "服务端生成 32 位 bid，写库后 302 回 /blog。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "title",
+                  "content",
+                  "authorId",
+                  "authorName",
+                  "authorAvatar",
+                  "categoryId"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "标题"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "正文"
+                  },
+                  "authorId": {
+                    "type": "string",
+                    "description": "作者 uid"
+                  },
+                  "authorName": {
+                    "type": "string",
+                    "description": "作者名"
+                  },
+                  "authorAvatar": {
+                    "type": "string",
+                    "description": "头像地址"
+                  },
+                  "categoryId": {
+                    "type": "integer",
+                    "description": "分类 id"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blog/read/{bid}": {
+      "get": {
+        "tags": [
+          "02-博客模块"
+        ],
+        "operationId": "read",
+        "summary": "博客详情",
+        "description": "浏览量 +1，并加载该博客的评论列表。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "bid",
+            "in": "path",
+            "required": true,
+            "description": "博客业务 id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/blog/editor/{uid}/{bid}": {
+      "get": {
+        "tags": [
+          "02-博客模块"
+        ],
+        "operationId": "toEditor",
+        "summary": "打开编辑页",
+        "description": "非作者访问会被重定向回 /blog。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "description": "操作人 uid",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "bid",
+            "in": "path",
+            "required": true,
+            "description": "博客 id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/blog/editor": {
+      "post": {
+        "tags": [
+          "02-博客模块"
+        ],
+        "operationId": "editor",
+        "summary": "提交编辑",
+        "description": "按 bid 更新标题/分类/正文。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "bid",
+                  "title",
+                  "categoryId",
+                  "content"
+                ],
+                "properties": {
+                  "bid": {
+                    "type": "string",
+                    "description": "博客 id"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "标题"
+                  },
+                  "categoryId": {
+                    "type": "integer",
+                    "description": "分类 id"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "正文"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blog/delete/{uid}/{bid}": {
+      "get": {
+        "tags": [
+          "02-博客模块"
+        ],
+        "operationId": "delete",
+        "summary": "删除博客",
+        "description": "uid 与作者不一致时拒绝删除。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "description": "操作人 uid",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "bid",
+            "in": "path",
+            "required": true,
+            "description": "博客 id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/blog/comment/{bid}": {
+      "post": {
+        "tags": [
+          "02-博客模块"
+        ],
+        "operationId": "comment",
+        "summary": "发表博客评论",
+        "description": "topicCategory 固定为 1。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "bid",
+            "in": "path",
+            "required": true,
+            "description": "博客 id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "topicId",
+                  "userId",
+                  "userName",
+                  "userAvatar",
+                  "content"
+                ],
+                "properties": {
+                  "topicId": {
+                    "type": "string",
+                    "description": "主题 id（等于 bid）"
+                  },
+                  "userId": {
+                    "type": "string",
+                    "description": "评论人 uid"
+                  },
+                  "userName": {
+                    "type": "string",
+                    "description": "评论人名称"
+                  },
+                  "userAvatar": {
+                    "type": "string",
+                    "description": "头像"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "评论内容"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/question": {
+      "get": {
+        "tags": [
+          "03-问答模块"
+        ],
+        "operationId": "questionList",
+        "summary": "问题列表（固定第 1 页 10 条）",
+        "description": "按 gmt_create 倒序。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/question/{page}/{limit}": {
+      "get": {
+        "tags": [
+          "03-问答模块"
+        ],
+        "operationId": "questionListPage",
+        "summary": "问题列表（分页）",
+        "description": "page<1 置为 1，limit 无上限校验。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "path",
+            "required": true,
+            "description": "页码",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "path",
+            "required": true,
+            "description": "每页条数",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/question/category/{cid}/{page}/{limit}": {
+      "get": {
+        "tags": [
+          "03-问答模块"
+        ],
+        "operationId": "questionByCategory",
+        "summary": "按分类查询问题",
+        "description": "按分类 id 分页。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "cid",
+            "in": "path",
+            "required": true,
+            "description": "分类 id",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page",
+            "in": "path",
+            "required": true,
+            "description": "页码",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "path",
+            "required": true,
+            "description": "每页条数",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/question/write": {
+      "get": {
+        "tags": [
+          "03-问答模块"
+        ],
+        "operationId": "toQuestionWrite",
+        "summary": "打开提问页",
+        "description": "需登录。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "03-问答模块"
+        ],
+        "operationId": "questionWrite",
+        "summary": "发布问题",
+        "description": "服务端生成 qid。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "title",
+                  "content",
+                  "authorId",
+                  "authorName",
+                  "authorAvatar",
+                  "categoryId"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "标题"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "正文"
+                  },
+                  "authorId": {
+                    "type": "string",
+                    "description": "作者 uid"
+                  },
+                  "authorName": {
+                    "type": "string",
+                    "description": "作者名"
+                  },
+                  "authorAvatar": {
+                    "type": "string",
+                    "description": "头像"
+                  },
+                  "categoryId": {
+                    "type": "integer",
+                    "description": "分类 id"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/question/read/{qid}": {
+      "get": {
+        "tags": [
+          "03-问答模块"
+        ],
+        "operationId": "questionRead",
+        "summary": "问题详情",
+        "description": "浏览量 +1 并加载评论。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "qid",
+            "in": "path",
+            "required": true,
+            "description": "问题 id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/question/comment/{qid}": {
+      "post": {
+        "tags": [
+          "03-问答模块"
+        ],
+        "operationId": "questionComment",
+        "summary": "发表问题评论",
+        "description": "topicCategory 固定为 2。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "qid",
+            "in": "path",
+            "required": true,
+            "description": "问题 id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "topicId",
+                  "userId",
+                  "userName",
+                  "userAvatar",
+                  "content"
+                ],
+                "properties": {
+                  "topicId": {
+                    "type": "string",
+                    "description": "主题 id"
+                  },
+                  "userId": {
+                    "type": "string",
+                    "description": "uid"
+                  },
+                  "userName": {
+                    "type": "string",
+                    "description": "名称"
+                  },
+                  "userAvatar": {
+                    "type": "string",
+                    "description": "头像"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "内容"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/question/editor/{uid}/{qid}": {
+      "get": {
+        "tags": [
+          "03-问答模块"
+        ],
+        "operationId": "toQuestionEditor",
+        "summary": "打开问题编辑页",
+        "description": "非作者重定向回 /question。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "description": "操作人 uid",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "qid",
+            "in": "path",
+            "required": true,
+            "description": "问题 id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/question/editor": {
+      "post": {
+        "tags": [
+          "03-问答模块"
+        ],
+        "operationId": "questionEditor",
+        "summary": "提交问题编辑",
+        "description": "按 qid 更新。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "qid",
+                  "title",
+                  "categoryId",
+                  "content"
+                ],
+                "properties": {
+                  "qid": {
+                    "type": "string",
+                    "description": "问题 id"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "标题"
+                  },
+                  "categoryId": {
+                    "type": "integer",
+                    "description": "分类 id"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "正文"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/question/delete/{uid}/{qid}": {
+      "get": {
+        "tags": [
+          "03-问答模块"
+        ],
+        "operationId": "questionDelete",
+        "summary": "删除问题",
+        "description": "uid 与作者不一致时拒绝。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "description": "操作人 uid",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "qid",
+            "in": "path",
+            "required": true,
+            "description": "问题 id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/question/write/file/upload": {
+      "post": {
+        "tags": [
+          "03-问答模块"
+        ],
+        "operationId": "questionUpload",
+        "summary": "上传问题附件",
+        "description": "multipart/form-data 上传。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/{uid}": {
+      "get": {
+        "tags": [
+          "04-用户与资料"
+        ],
+        "operationId": "userHome",
+        "summary": "用户主页",
+        "description": "展示用户资料与其博客/问题/评论。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "description": "用户 uid",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/user/blog/{uid}/{page}/{limit}": {
+      "get": {
+        "tags": [
+          "04-用户与资料"
+        ],
+        "operationId": "userBlogs",
+        "summary": "用户博客列表",
+        "description": "分页。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "description": "uid",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "path",
+            "required": true,
+            "description": "页码",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "path",
+            "required": true,
+            "description": "每页条数",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/user/question/{uid}/{page}/{limit}": {
+      "get": {
+        "tags": [
+          "04-用户与资料"
+        ],
+        "operationId": "userQuestions",
+        "summary": "用户问题列表",
+        "description": "分页。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "description": "uid",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "path",
+            "required": true,
+            "description": "页码",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "path",
+            "required": true,
+            "description": "每页条数",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/user/comment/{uid}/{page}/{limit}": {
+      "get": {
+        "tags": [
+          "04-用户与资料"
+        ],
+        "operationId": "userComments",
+        "summary": "用户评论列表",
+        "description": "分页。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "description": "uid",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "path",
+            "required": true,
+            "description": "页码",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "path",
+            "required": true,
+            "description": "每页条数",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/user/donate/{uid}": {
+      "get": {
+        "tags": [
+          "04-用户与资料"
+        ],
+        "operationId": "donate",
+        "summary": "赞赏页",
+        "description": "展示赞赏二维码。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "description": "uid",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/user/update-avatar/{uid}": {
+      "get": {
+        "tags": [
+          "04-用户与资料"
+        ],
+        "operationId": "updateAvatar",
+        "summary": "修改头像页",
+        "description": "需登录。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "description": "uid",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/user/comment/delete/{uid}/{cid}": {
+      "get": {
+        "tags": [
+          "04-用户与资料"
+        ],
+        "operationId": "deleteComment",
+        "summary": "删除评论",
+        "description": "按 comment_id 删除后回到评论列表。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "description": "uid",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cid",
+            "in": "path",
+            "required": true,
+            "description": "评论 id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/userinfo/setting/{uid}": {
+      "get": {
+        "tags": [
+          "04-用户与资料"
+        ],
+        "operationId": "userinfoSetting",
+        "summary": "资料设置页",
+        "description": "需登录。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "description": "uid",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/userinfo/update/{uid}": {
+      "post": {
+        "tags": [
+          "04-用户与资料"
+        ],
+        "operationId": "userinfoUpdate",
+        "summary": "更新资料",
+        "description": "更新昵称/真实姓名/邮箱/简介。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "description": "uid",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nickname",
+                  "realname",
+                  "email",
+                  "intro"
+                ],
+                "properties": {
+                  "nickname": {
+                    "type": "string",
+                    "description": "昵称"
+                  },
+                  "realname": {
+                    "type": "string",
+                    "description": "真实姓名"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "邮箱"
+                  },
+                  "intro": {
+                    "type": "string",
+                    "description": "简介"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/download": {
+      "get": {
+        "tags": [
+          "05-公共页面"
+        ],
+        "operationId": "download",
+        "summary": "资源库",
+        "description": "列出可下载资源。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/say": {
+      "get": {
+        "tags": [
+          "05-公共页面"
+        ],
+        "operationId": "sayList",
+        "summary": "公告列表",
+        "description": "需登录。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/say/{role}": {
+      "post": {
+        "tags": [
+          "05-公共页面"
+        ],
+        "operationId": "sayPublish",
+        "summary": "发布公告",
+        "description": "role 为角色 id（1=管理员）。",
+        "responses": {
+          "200": {
+            "description": "成功，返回 Thymeleaf 渲染的 HTML 页面",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "重定向",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "role",
+            "in": "path",
+            "required": true,
+            "description": "角色 id",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "content"
+                ],
+                "properties": {
+                  "content": {
+                    "type": "string",
+                    "description": "公告内容"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
