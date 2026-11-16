@@ -1,0 +1,550 @@
+{
+  "apifoxCli": "1.1",
+  "item": [
+    {
+      "name": "博客主流程",
+      "item": [
+        {
+          "name": "登录",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "admin",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "123456",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code = 200', function(){ pm.response.to.have.status(200); });",
+                  "pm.test('响应时间 < 2000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(2000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "博客列表",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/1/10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "1",
+                "10"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var m=pm.response.text().match(/blog\\/read\\/([0-9a-zA-Z-]+)/); if(m){ pm.variables.set('bid', m[1]); }",
+                  "pm.test('HTTP Code = 200', function(){ pm.response.to.have.status(200); });",
+                  "pm.test('提取 bid', function(){ pm.expect(pm.variables.get('bid')).to.not.be.undefined; });",
+                  "pm.test('响应时间 < 2000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(2000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "写博客页面",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/write",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "write"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code = 200', function(){ pm.response.to.have.status(200); });",
+                  "pm.test('响应时间 < 2000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(2000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "提交博客",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/write",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "write"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "title",
+                  "value": "test post",
+                  "type": "text"
+                },
+                {
+                  "key": "summary",
+                  "value": "test",
+                  "type": "text"
+                },
+                {
+                  "key": "content",
+                  "value": "hello world",
+                  "type": "text"
+                },
+                {
+                  "key": "categoryId",
+                  "value": "1",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code = 200', function(){ pm.response.to.have.status(200); });",
+                  "pm.test('响应时间 < 2000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(2000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "博客详情",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/read/{{bid}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "read",
+                "{{bid}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code = 200', function(){ pm.response.to.have.status(200); });",
+                  "pm.test('响应时间 < 2000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(2000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "删除博客",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/delete?id={{bid}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "delete?id={{bid}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code = 200', function(){ pm.response.to.have.status(200); });",
+                  "pm.test('响应时间 < 2000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(2000); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "安全-接口测试",
+      "item": [
+        {
+          "name": "未登录访问写博客页",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/write",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "write"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code = 500', function(){ pm.response.to.have.status(500); });",
+                  "pm.test('响应时间 < 2000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(2000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "未登录访问博客详情",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/read/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "read",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code = 500', function(){ pm.response.to.have.status(500); });",
+                  "pm.test('响应时间 < 2000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(2000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "未登录访问博客列表",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/1/10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "1",
+                "10"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code = 200', function(){ pm.response.to.have.status(200); });",
+                  "pm.test('响应时间 < 2000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(2000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "未登录提交博客",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/write",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "write"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "title",
+                  "value": "x",
+                  "type": "text"
+                },
+                {
+                  "key": "content",
+                  "value": "y",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code = 500', function(){ pm.response.to.have.status(500); });",
+                  "pm.test('响应时间 < 2000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(2000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "未登录访问写问答页",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/question/write",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "question",
+                "write"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code = 500', function(){ pm.response.to.have.status(500); });",
+                  "pm.test('响应时间 < 2000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(2000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "未登录删除博客",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/delete?id=1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "delete?id=1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code = 200', function(){ pm.response.to.have.status(200); });",
+                  "pm.test('响应时间 < 2000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(2000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "未登录访问问答列表",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/question",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "question"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code = 200', function(){ pm.response.to.have.status(200); });",
+                  "pm.test('响应时间 < 2000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(2000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "未登录访问首页",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                ""
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code = 200', function(){ pm.response.to.have.status(200); });",
+                  "pm.test('响应时间 < 2000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(2000); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "environments": []
+}
