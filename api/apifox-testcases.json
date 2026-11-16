@@ -1,0 +1,2054 @@
+{
+  "apifoxCli": "1.1",
+  "item": [
+    {
+      "name": "博客主流程",
+      "item": [
+        {
+          "name": "登录",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "root",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "123456",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });",
+                  "var hdrs=pm.response.headers.all();var jsid=null;for(var i=0;i<hdrs.length;i++){  if(hdrs[i].key==='Set-Cookie'){    var m=hdrs[i].value.match(/JSESSIONID=([^;]+)/);    if(m){ jsid=m[1]; }  }}if(jsid){ pm.variables.set('jsessionid', jsid); }pm.test('登录成功', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "博客列表",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "JSESSIONID={{jsessionid}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/blog/:page/:limit",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                ":page",
+                ":limit"
+              ],
+              "variable": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });",
+                  "var m=pm.response.text().match(/blog\\/read\\/([0-9a-zA-Z-]+)/); if(m){ pm.variables.set('bid', m[1]); } pm.test('提取bid', function(){ pm.expect(pm.variables.get('bid')).to.not.be.undefined; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "写博客页面",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "JSESSIONID={{jsessionid}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/blog/write",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "write"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "提交博客",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "JSESSIONID={{jsessionid}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/blog/write",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "write"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "title",
+                  "value": "test post",
+                  "type": "text"
+                },
+                {
+                  "key": "summary",
+                  "value": "test",
+                  "type": "text"
+                },
+                {
+                  "key": "content",
+                  "value": "hello world",
+                  "type": "text"
+                },
+                {
+                  "key": "categoryId",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "authorId",
+                  "value": "u-admin-0001",
+                  "type": "text"
+                },
+                {
+                  "key": "authorName",
+                  "value": "root",
+                  "type": "text"
+                },
+                {
+                  "key": "authorAvatar",
+                  "value": "",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "博客详情",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "JSESSIONID={{jsessionid}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/blog/read/:bid",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "read",
+                ":bid"
+              ],
+              "variable": [
+                {
+                  "key": "bid",
+                  "value": "{{bid}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "删除博客",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "JSESSIONID={{jsessionid}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/blog/delete/:uid/:bid",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "delete",
+                ":uid",
+                ":bid"
+              ],
+              "variable": [
+                {
+                  "key": "uid",
+                  "value": "u-admin-0001"
+                },
+                {
+                  "key": "bid",
+                  "value": "{{bid}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "安全-接口测试",
+      "item": [
+        {
+          "name": "未登录-写博客页",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/write",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "write"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "未登录-博客详情",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/read/:bid",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "read",
+                ":bid"
+              ],
+              "variable": [
+                {
+                  "key": "bid",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "未登录-博客列表",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/:page/:limit",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                ":page",
+                ":limit"
+              ],
+              "variable": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "未登录-提交博客",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/write",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "write"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "title",
+                  "value": "x",
+                  "type": "text"
+                },
+                {
+                  "key": "content",
+                  "value": "y",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "未登录-写问答页",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/question/write",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "question",
+                "write"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "未登录-删除博客",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/delete/:uid/:bid",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "delete",
+                ":uid",
+                ":bid"
+              ],
+              "variable": [
+                {
+                  "key": "uid",
+                  "value": "1"
+                },
+                {
+                  "key": "bid",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "未登录-问答列表",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/question/:page/:limit",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "question",
+                ":page",
+                ":limit"
+              ],
+              "variable": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "未登录-用户主页",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/user/:uid",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "user",
+                ":uid"
+              ],
+              "variable": [
+                {
+                  "key": "uid",
+                  "value": "u-admin-0001"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "未登录-首页",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                ""
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "公共接口覆盖",
+      "item": [
+        {
+          "name": "首页index",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/index",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "index"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "登录页",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/toLogin",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "toLogin"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "注册页",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "register"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "问答首页",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/question",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "question"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "问答分类列表",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/question/category/:cid/:page/:limit",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "question",
+                "category",
+                ":cid",
+                ":page",
+                ":limit"
+              ],
+              "variable": [
+                {
+                  "key": "cid",
+                  "value": "1"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "博客分类列表",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/category/:bid/:page/:limit",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "category",
+                ":bid",
+                ":page",
+                ":limit"
+              ],
+              "variable": [
+                {
+                  "key": "bid",
+                  "value": "1"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "问答详情",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/question/read/:qid",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "question",
+                "read",
+                ":qid"
+              ],
+              "variable": [
+                {
+                  "key": "qid",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "用户主页",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/user/:uid",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "user",
+                ":uid"
+              ],
+              "variable": [
+                {
+                  "key": "uid",
+                  "value": "u-admin-0001"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "资源下载页",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/download",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "download"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "公告",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/say",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "say"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "公告-角色(发布)",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/say/:role",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "say",
+                ":role"
+              ],
+              "variable": [
+                {
+                  "key": "role",
+                  "value": "1"
+                }
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "content",
+                  "value": "test say",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "用户博客列表",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/user/blog/:uid/:page/:limit",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "user",
+                "blog",
+                ":uid",
+                ":page",
+                ":limit"
+              ],
+              "variable": [
+                {
+                  "key": "uid",
+                  "value": "u-admin-0001"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "用户问答列表",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/user/question/:uid/:page/:limit",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "user",
+                "question",
+                ":uid",
+                ":page",
+                ":limit"
+              ],
+              "variable": [
+                {
+                  "key": "uid",
+                  "value": "u-admin-0001"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "用户评论列表",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/user/comment/:uid/:page/:limit",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "user",
+                "comment",
+                ":uid",
+                ":page",
+                ":limit"
+              ],
+              "variable": [
+                {
+                  "key": "uid",
+                  "value": "u-admin-0001"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "博客评论",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/comment/:bid",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "comment",
+                ":bid"
+              ],
+              "variable": [
+                {
+                  "key": "bid",
+                  "value": "1"
+                }
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "content",
+                  "value": "test comment",
+                  "type": "text"
+                },
+                {
+                  "key": "userId",
+                  "value": "u-admin-0001",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "问答评论",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/question/comment/:qid",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "question",
+                "comment",
+                ":qid"
+              ],
+              "variable": [
+                {
+                  "key": "qid",
+                  "value": "1"
+                }
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "content",
+                  "value": "test comment",
+                  "type": "text"
+                },
+                {
+                  "key": "userId",
+                  "value": "u-admin-0001",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "用户捐赠页",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/user/donate/:uid",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "user",
+                "donate",
+                ":uid"
+              ],
+              "variable": [
+                {
+                  "key": "uid",
+                  "value": "u-admin-0001"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "用户设置页",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/userinfo/setting/:uid",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "userinfo",
+                "setting",
+                ":uid"
+              ],
+              "variable": [
+                {
+                  "key": "uid",
+                  "value": "u-admin-0001"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "博客首页",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "博客编辑页",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/editor/:uid/:bid",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "editor",
+                ":uid",
+                ":bid"
+              ],
+              "variable": [
+                {
+                  "key": "uid",
+                  "value": "u-admin-0001"
+                },
+                {
+                  "key": "bid",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "问答编辑页",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/question/editor/:uid/:qid",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "question",
+                "editor",
+                ":uid",
+                ":qid"
+              ],
+              "variable": [
+                {
+                  "key": "uid",
+                  "value": "u-admin-0001"
+                },
+                {
+                  "key": "qid",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "删除问答",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/question/delete/:uid/:qid",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "question",
+                "delete",
+                ":uid",
+                ":qid"
+              ],
+              "variable": [
+                {
+                  "key": "uid",
+                  "value": "u-admin-0001"
+                },
+                {
+                  "key": "qid",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "用户头像页",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/user/update-avatar/:uid",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "user",
+                "update-avatar",
+                ":uid"
+              ],
+              "variable": [
+                {
+                  "key": "uid",
+                  "value": "u-admin-0001"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "提交问答",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/question/write",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "question",
+                "write"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "title",
+                  "value": "test q",
+                  "type": "text"
+                },
+                {
+                  "key": "content",
+                  "value": "test",
+                  "type": "text"
+                },
+                {
+                  "key": "categoryId",
+                  "value": "1",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "更新用户信息",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/userinfo/update/:uid",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "userinfo",
+                "update",
+                ":uid"
+              ],
+              "variable": [
+                {
+                  "key": "uid",
+                  "value": "u-admin-0001"
+                }
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "nickname",
+                  "value": "test",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "编辑博客提交",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/blog/editor",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "blog",
+                "editor"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "bid",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "title",
+                  "value": "edit",
+                  "type": "text"
+                },
+                {
+                  "key": "content",
+                  "value": "edit",
+                  "type": "text"
+                },
+                {
+                  "key": "categoryId",
+                  "value": "1",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "编辑问答提交",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/question/editor",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "question",
+                "editor"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "qid",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "title",
+                  "value": "edit",
+                  "type": "text"
+                },
+                {
+                  "key": "content",
+                  "value": "edit",
+                  "type": "text"
+                },
+                {
+                  "key": "categoryId",
+                  "value": "1",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "删除评论",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/user/comment/delete/:uid/:cid",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "user",
+                "comment",
+                "delete",
+                ":uid",
+                ":cid"
+              ],
+              "variable": [
+                {
+                  "key": "uid",
+                  "value": "u-admin-0001"
+                },
+                {
+                  "key": "cid",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "注册",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "apitestuser",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "123456",
+                  "type": "text"
+                },
+                {
+                  "key": "repassword",
+                  "value": "123456",
+                  "type": "text"
+                },
+                {
+                  "key": "code",
+                  "value": "INVITE2026",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "退出登录",
+          "metaInfo": {
+            "type": "http"
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/logout",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "logout"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP Code 合法', function(){ pm.expect(pm.response.code).to.be.oneOf([200,302,500]); });",
+                  "pm.test('响应时间 < 3000ms', function(){ pm.expect(pm.response.responseTime).to.be.below(3000); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "environments": []
+}
